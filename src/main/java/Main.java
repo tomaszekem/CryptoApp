@@ -18,6 +18,7 @@ public class Main {
     private static JButton selectFileToEncryptBtn;
     private static JButton encryptFileToDatabaseBtn;
     private static JButton decryptFileFromDatabaseBtn;
+    private static JButton programPresentationBtn;
     private static CryptoOperationsController cryptoOperationsController = new CryptoOperationsController();
     private static final JFileChooser fileChooser = new JFileChooser();
 
@@ -33,12 +34,10 @@ public class Main {
         frame.setSize(800, 900);
 
         //Creating the MenuBar and adding components
-        JMenuBar menuBar = createMenuBar();
         createBottomPanel();
         textArea = new JTextArea();
         //Adding Components to the frame.
         frame.getContentPane().add(BorderLayout.SOUTH, panel);
-        frame.getContentPane().add(BorderLayout.NORTH, menuBar);
         frame.getContentPane().add(BorderLayout.CENTER, textArea);
         frame.setVisible(true);
 
@@ -55,16 +54,16 @@ public class Main {
     }
 
     private static void createBottomPanel() {
-        //Creating the panel at bottom and adding components
-        panel = new JPanel(); // the panel is not visible in output
+        panel = new JPanel();
         JLabel enterTextLabel = new JLabel("Wprowadz tekst");
-        textField = new JTextField(30); // accepts upto 10 characters
+        textField = new JTextField(30);
         encryptBtn = new JButton("Zaszyfruj");
         JButton resetBtn = new JButton("Wyczyść");
         selectFileToEncryptBtn = new JButton("Zaszyfruj plik");
         selectFileToDecryptBtn = new JButton("Deszyfruj plik");
         encryptFileToDatabaseBtn = new JButton("Zaszyfruj plik do bazy danych");
         decryptFileFromDatabaseBtn = new JButton("Odszyfruj plik z bazy danych");
+        programPresentationBtn = new JButton("Samograj");
         panel.add(enterTextLabel);
         panel.add(enterTextLabel);
         panel.add(textField);
@@ -74,6 +73,7 @@ public class Main {
         panel.add(selectFileToDecryptBtn);
         panel.add(encryptFileToDatabaseBtn);
         panel.add(decryptFileFromDatabaseBtn);
+        panel.add(programPresentationBtn);
 
         initButtons();
 
@@ -84,7 +84,6 @@ public class Main {
             final String plainText = textField.getText();
             if (plainText != null && !plainText.isEmpty()) {
                 encryptTextAndPrintResult(plainText);
-
             }
         });
 
@@ -92,8 +91,7 @@ public class Main {
             int result = fileChooser.showOpenDialog(panel);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                cryptoOperationsController.encryptFile(file);
-                textArea.append("Zaszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getEncryptedFilePath() + "\n");
+                encryptFile(file);
 
             }
 
@@ -103,8 +101,7 @@ public class Main {
             int result = fileChooser.showOpenDialog(panel);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                cryptoOperationsController.decryptFile(file);
-                textArea.append("Odszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getDecryptedFilePath() + "\n");
+                decryptFile(file);
 
             }
         });
@@ -114,8 +111,7 @@ public class Main {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
                 try {
-                    cryptoOperationsController.encryptFileToDatabase(file);
-                    textArea.append("Zapisano zaszyfrowany plik " + file.getName() + " do bazy danych \n");
+                    saveEncryptedInDB(file);
                 } catch (IOException e) {
                     textArea.append("Błąd podczas szyfrowania pliku do bazy danych \n");
                 }
@@ -130,27 +126,69 @@ public class Main {
 
             if (!StringUtils.isNullOrEmpty(selectedFileName)) {
                 try {
-                    cryptoOperationsController.decryptFileFromDB(selectedFileName);
-                    textArea.append("Odszyfrowany plik " + selectedFileName + " znajduje się w katalogu "
-                    + AppConfig.getDecryptedFilesFromDbPath() + "\n");
+                    decryptFileFromDB(selectedFileName);
                 } catch (IOException e) {
                     textArea.append("Błąd podczas szyfrowania pliku do bazy danych \n");
                 }
             }
         });
+
+        programPresentationBtn.addActionListener(a -> {
+
+            textArea.append("--------- PREZENTACJA APLIKACJI -----------------\n");
+            textArea.append("SZYFROWANIE TEKSTU : \n");
+
+            String plainText = "TEKST JAWNY";
+            textField.setText(plainText);
+            encryptTextAndPrintResult(plainText);
+
+            textArea.append("-------------------------------------------\n");
+
+            textArea.append("SZYFROWANIE I DESZYFROWANIE PLIKU : \n");
+
+            File plainTextFile = new File(AppConfig.getPlainTextFilePath());
+            encryptFile(plainTextFile);
+
+            File encryptedFile = new File(AppConfig.getEncryptedFilePath());
+            decryptFile(encryptedFile);
+
+            textArea.append("ZAPIS SZYFROWANEGO PLIKU DO BAZY DANYCH \n");
+
+
+            try {
+                textArea.append("Szyfruję plik " + plainTextFile.getName() + " do bazy danych \n");
+                saveEncryptedInDB(plainTextFile);
+
+                textArea.append("Deszyfruję plik " + plainTextFile.getName() + " z bazy danych \n");
+                decryptFileFromDB("plainTextFile");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        });
     }
 
-    private static JMenuBar createMenuBar() {
-        JMenuBar mb = new JMenuBar();
-        JMenu m1 = new JMenu("FILE");
-        JMenu m2 = new JMenu("Help");
-        mb.add(m1);
-        mb.add(m2);
-        JMenuItem m11 = new JMenuItem("Open");
-        JMenuItem m22 = new JMenuItem("Save as");
-        m1.add(m11);
-        m1.add(m22);
-        return mb;
+    private static void decryptFileFromDB(String selectedFileName) throws IOException {
+        cryptoOperationsController.decryptFileFromDB(selectedFileName);
+        textArea.append("Odszyfrowany plik " + selectedFileName + " znajduje się w katalogu "
+                + AppConfig.getDecryptedFilesFromDbPath() + "\n");
+    }
+
+    private static void saveEncryptedInDB(File file) throws IOException {
+        cryptoOperationsController.encryptFileToDatabase(file);
+        textArea.append("Zapisano zaszyfrowany plik " + file.getName() + " do bazy danych \n");
+    }
+
+    private static void decryptFile(File file) {
+        cryptoOperationsController.decryptFile(file);
+        textArea.append("Odszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getDecryptedFilePath() + "\n");
+    }
+
+    private static void encryptFile(File file) {
+        cryptoOperationsController.encryptFile(file);
+        textArea.append("Zaszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getEncryptedFilePath() + "\n");
     }
 
 }
