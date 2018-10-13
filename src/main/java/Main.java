@@ -1,11 +1,12 @@
+import com.mysql.cj.util.StringUtils;
 import config.AppConfig;
 import controller.CryptoOperationsController;
-import crypto.TripleDESEncrypter;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
@@ -15,15 +16,13 @@ public class Main {
     private static JButton encryptBtn;
     private static JButton selectFileToDecryptBtn;
     private static JButton selectFileToEncryptBtn;
+    private static JButton encryptFileToDatabaseBtn;
+    private static JButton decryptFileFromDatabaseBtn;
     private static CryptoOperationsController cryptoOperationsController = new CryptoOperationsController();
     private static final JFileChooser fileChooser = new JFileChooser();
 
     public static void main(String[] args) throws Exception {
         initView();
-
-
-//        TripleDESEncrypter tripleDESEncrypter = TripleDESEncrypter.getInstance();
-//        handleFileEncrypting(tripleDESEncrypter);
 
     }
 
@@ -46,10 +45,6 @@ public class Main {
 
     }
 
-    private static void encryptFile() {
-
-    }
-
     private static void encryptTextAndPrintResult(String plainText) {
         String encryptedText = cryptoOperationsController.encryptText(plainText);
         textArea.append("Szyfruję tekst : " + plainText + "\n");
@@ -68,6 +63,8 @@ public class Main {
         JButton resetBtn = new JButton("Wyczyść");
         selectFileToEncryptBtn = new JButton("Zaszyfruj plik");
         selectFileToDecryptBtn = new JButton("Deszyfruj plik");
+        encryptFileToDatabaseBtn = new JButton("Zaszyfruj plik do bazy danych");
+        decryptFileFromDatabaseBtn = new JButton("Odszyfruj plik z bazy danych");
         panel.add(enterTextLabel);
         panel.add(enterTextLabel);
         panel.add(textField);
@@ -75,7 +72,14 @@ public class Main {
         panel.add(resetBtn);
         panel.add(selectFileToEncryptBtn);
         panel.add(selectFileToDecryptBtn);
+        panel.add(encryptFileToDatabaseBtn);
+        panel.add(decryptFileFromDatabaseBtn);
 
+        initButtons();
+
+    }
+
+    private static void initButtons() {
         encryptBtn.addActionListener(ae -> {
             final String plainText = textField.getText();
             if (plainText != null && !plainText.isEmpty()) {
@@ -105,6 +109,35 @@ public class Main {
             }
         });
 
+        encryptFileToDatabaseBtn.addActionListener(a -> {
+            int result = fileChooser.showOpenDialog(panel);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                try {
+                    cryptoOperationsController.encryptFileToDatabase(file);
+                    textArea.append("Zapisano zaszyfrowany plik " + file.getName() + " do bazy danych \n");
+                } catch (IOException e) {
+                    textArea.append("Błąd podczas szyfrowania pliku do bazy danych \n");
+                }
+
+            }
+        });
+
+        decryptFileFromDatabaseBtn.addActionListener(a -> {
+            List<String> fileNames = cryptoOperationsController.getAllEncryptedInDBFileNames();
+            String selectedFileName = (String) JOptionPane.showInputDialog(null, "Wybierz plik",
+                    "Wybór pliku", JOptionPane.QUESTION_MESSAGE, null, fileNames.toArray(), null);
+
+            if (!StringUtils.isNullOrEmpty(selectedFileName)) {
+                try {
+                    cryptoOperationsController.decryptFileFromDB(selectedFileName);
+                    textArea.append("Odszyfrowany plik " + selectedFileName + " znajduje się w katalogu "
+                    + AppConfig.DECRYPTED_FILES_FROM_DB_PATH + "\n");
+                } catch (IOException e) {
+                    textArea.append("Błąd podczas szyfrowania pliku do bazy danych \n");
+                }
+            }
+        });
     }
 
     private static JMenuBar createMenuBar() {
@@ -118,43 +151,6 @@ public class Main {
         m1.add(m11);
         m1.add(m22);
         return mb;
-    }
-
-    private static void handleFileEncrypting(TripleDESEncrypter tripleDESEncrypter) {
-//        ClassLoader classLoader = Main.class.getClassLoader();
-//        File plainTextFile = new File(classLoader.getResource("plainTextFile.txt").getFile());
-//        File encryptedFile = new File(classLoader.getResource("encryptedFile.txt").getFile());
-//        File decryptionResultFile = new File(classLoader.getResource("decryptedFile.txt").getFile());
-//
-//        String plainTextFilePath = getPathFromFile(plainTextFile);
-//        String encryptedFilePath = getPathFromFile(encryptedFile);
-//        String decryptionResultFilePath = getPathFromFile(decryptionResultFile);
-//
-//        tripleDESEncrypter.encryptFile(plainTextFilePath, encryptedFilePath);
-//        tripleDESEncrypter.decryptFile(encryptedFilePath, decryptionResultFilePath);
-
-        tripleDESEncrypter.encryptFile(AppConfig.PLAIN_TEXT_FILE_PATH, AppConfig.ENCRYPTED_FILE_PATH);
-        tripleDESEncrypter.decryptFile(AppConfig.ENCRYPTED_FILE_PATH, AppConfig.DECRYPTED_FILE_PATH);
-
-
-        System.out.println("Zaszyfrowano zawartość pliku testowego do pliku " + AppConfig.TEXT_ENCRYPTION_OUTPUT_FILE_PATH);
-        System.out.println("Odszyfrowano zawartość do pliku " + AppConfig.DECRYPTED_FILE_PATH);
-    }
-
-    private static String getPathFromFile(File plainTextFile) {
-        return plainTextFile.getAbsolutePath().replace("\\", "/");
-    }
-
-    private static void handleTextEncrypting(TripleDESEncrypter tripleDESEncrypter, Scanner scanner) {
-        System.out.println("Wprowadz tekst do zaszyfrowania");
-        String text = scanner.nextLine();
-        String encrypted = tripleDESEncrypter.encrypt(text);
-        String decrypted = tripleDESEncrypter.decrypt(encrypted);
-
-        System.out.println("Wprowadzono: " + text);
-        System.out.println("Po zaszyforowaniu:" + encrypted);
-        System.out.println("Po odszyfrowaniu:" + decrypted);
-        System.out.println("Szyfrogram zapisano w " + AppConfig.TEXT_ENCRYPTION_OUTPUT_FILE_PATH);
     }
 
 }

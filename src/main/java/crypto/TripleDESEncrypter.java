@@ -1,8 +1,11 @@
 package crypto;
 
 import config.AppConfig;
+import db.entity.EncryptedData;
 import file.FileManager;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESedeKeySpec;
@@ -81,8 +84,31 @@ public class TripleDESEncrypter {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public EncryptedData encryptFile(File file) throws IOException {
+        initCipher(Cipher.ENCRYPT_MODE);
+        File tempFile = File.createTempFile("tempfile", ".tmp");
 
+        FileInputStream in = new FileInputStream(file.getAbsoluteFile());
+        FileOutputStream out = new FileOutputStream(tempFile);
+
+        CipherInputStream cis = new CipherInputStream(in, cipher);
+        doCopy(cis, out);
+
+        FileInputStream fileInputStream = new FileInputStream(tempFile);
+        EncryptedData encryptedData = new EncryptedData(IOUtils.toByteArray(fileInputStream), file);
+        fileInputStream.close();
+        tempFile.delete();
+        return encryptedData;
+    }
+
+    public void decryptFile(EncryptedData encryptedData) throws IOException {
+//        File encryptedFile = new File(AppConfig.ENCRYPTED_FILE_FROM_DB_PATH + encryptedData.getFileName() + encryptedData.getFileExtension());
+        File encryptedFile = File.createTempFile("tempfile", ".tmp");
+        FileUtils.writeByteArrayToFile(encryptedFile, encryptedData.getData());
+        File file = new File(AppConfig.DECRYPTED_FILES_FROM_DB_PATH + encryptedData.getFileNameWithExtension());
+        decryptFile(encryptedFile.getAbsolutePath(), file.getAbsolutePath());
     }
 
 
