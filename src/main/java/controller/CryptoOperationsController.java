@@ -23,11 +23,11 @@ public class CryptoOperationsController {
     }
 
     public void encryptFile(File file) {
-        tripleDESEncrypter.encryptFile(file.getAbsolutePath(), AppConfig.ENCRYPTED_FILE_PATH);
+        tripleDESEncrypter.encryptFile(file.getAbsolutePath(), AppConfig.getEncryptedFilePath());
     }
 
     public void decryptFile(File encryptedFile) {
-        tripleDESEncrypter.decryptFile(encryptedFile.getAbsolutePath(), AppConfig.DECRYPTED_FILE_PATH);
+        tripleDESEncrypter.decryptFile(encryptedFile.getAbsolutePath(), AppConfig.getDecryptedFilePath());
     }
 
     public void encryptFileToDatabase(File file) throws IOException {

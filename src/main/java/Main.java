@@ -48,7 +48,7 @@ public class Main {
     private static void encryptTextAndPrintResult(String plainText) {
         String encryptedText = cryptoOperationsController.encryptText(plainText);
         textArea.append("Szyfruję tekst : " + plainText + "\n");
-        textArea.append("Zaszyfrowano wprowadzony tekst do pliku " + AppConfig.TEXT_ENCRYPTION_OUTPUT_FILE_PATH + "\n");
+        textArea.append("Zaszyfrowano wprowadzony tekst do pliku " + AppConfig.getTextEncryptionOutputFilePath() + "\n");
         textArea.append("Zaszyfrowany tekst : " + encryptedText + "\n");
         textArea.append("Odszyfrowywanie...\n");
         textArea.append("Odszyfrowany tekst : " + cryptoOperationsController.decryptText(encryptedText) + "\n");
@@ -93,7 +93,7 @@ public class Main {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
                 cryptoOperationsController.encryptFile(file);
-                textArea.append("Zaszyfrowano plik " + file.getName() + " do pliku " + AppConfig.ENCRYPTED_FILE_PATH + "\n");
+                textArea.append("Zaszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getEncryptedFilePath() + "\n");
 
             }
 
@@ -104,7 +104,7 @@ public class Main {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
                 cryptoOperationsController.decryptFile(file);
-                textArea.append("Odszyfrowano plik " + file.getName() + " do pliku " + AppConfig.DECRYPTED_FILE_PATH + "\n");
+                textArea.append("Odszyfrowano plik " + file.getName() + " do pliku " + AppConfig.getDecryptedFilePath() + "\n");
 
             }
         });
@@ -132,7 +132,7 @@ public class Main {
                 try {
                     cryptoOperationsController.decryptFileFromDB(selectedFileName);
                     textArea.append("Odszyfrowany plik " + selectedFileName + " znajduje się w katalogu "
-                    + AppConfig.DECRYPTED_FILES_FROM_DB_PATH + "\n");
+                    + AppConfig.getDecryptedFilesFromDbPath() + "\n");
                 } catch (IOException e) {
                     textArea.append("Błąd podczas szyfrowania pliku do bazy danych \n");
                 }

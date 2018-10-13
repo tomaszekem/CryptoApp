@@ -54,7 +54,7 @@ public class TripleDESEncrypter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        FileManager.getInstance().saveToFile(encryptedText, new File(AppConfig.TEXT_ENCRYPTION_OUTPUT_FILE_PATH));
+        FileManager.getInstance().saveToFile(encryptedText, new File(AppConfig.getTextEncryptionOutputFilePath()));
         return encryptedText;
     }
 
@@ -107,7 +107,7 @@ public class TripleDESEncrypter {
 //        File encryptedFile = new File(AppConfig.ENCRYPTED_FILE_FROM_DB_PATH + encryptedData.getFileName() + encryptedData.getFileExtension());
         File encryptedFile = File.createTempFile("tempfile", ".tmp");
         FileUtils.writeByteArrayToFile(encryptedFile, encryptedData.getData());
-        File file = new File(AppConfig.DECRYPTED_FILES_FROM_DB_PATH + encryptedData.getFileNameWithExtension());
+        File file = new File(AppConfig.getDecryptedFilesFromDbPath() + encryptedData.getFileNameWithExtension());
         decryptFile(encryptedFile.getAbsolutePath(), file.getAbsolutePath());
     }
 

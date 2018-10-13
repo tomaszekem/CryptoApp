@@ -1,14 +1,40 @@
 package config;
 
+import sun.applet.Main;
+
+import java.io.IOException;
+import java.util.Properties;
+
 public class AppConfig {
+    private static final Properties props;
 
-    public static final String TEXT_ENCRYPTION_OUTPUT_FILE_PATH = "C:/Users/tomas/Desktop/LAB1TM/src/main/resources/textEncryptionResult.txt";
+    static {
+        props = new Properties();
+        try {
+            props.load(AppConfig.class.getClassLoader().getResourceAsStream("config/config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public static final String PLAIN_TEXT_FILE_PATH = "C:/Users/tomas/Desktop/LAB1TM/src/main/resources/plainTextFile.txt";
-    public static final String ENCRYPTED_FILE_PATH = "C:/Users/tomas/Desktop/LAB1TM/src/main/resources/encryptedFile.txt";
-    public static final String DECRYPTED_FILE_PATH = "C:/Users/tomas/Desktop/LAB1TM/src/main/resources/decryptedFile.txt";
+    public static String getTextEncryptionOutputFilePath() {
+        return props.getProperty("text.encryption.outputFilePath");
+    }
 
-    public static final String DECRYPTED_FILES_FROM_DB_PATH = "C:/Users/tomas/Desktop/";
+    public static String getPlainTextFilePath() {
+        return props.getProperty("plainTextFile.path");
+    }
 
+    public static String getEncryptedFilePath() {
+        return props.getProperty("encryptedFile.path");
+    }
+
+    public static String getDecryptedFilePath() {
+        return props.getProperty("decryptedFile.path");
+    }
+
+    public static String getDecryptedFilesFromDbPath() {
+        return props.getProperty("decryptedFilesFromDB.path");
+    }
 
 }

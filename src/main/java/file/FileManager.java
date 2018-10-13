@@ -28,6 +28,7 @@ public class FileManager {
     }
 
     public void saveToFile(String text, File file) {
+
         try (PrintWriter out = new PrintWriter(file)) {
             out.println(text);
         } catch (FileNotFoundException e) {
