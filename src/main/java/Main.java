@@ -157,6 +157,8 @@ public class Main {
                 textArea.append("Szyfruję plik " + plainTextFile.getName() + " do bazy danych \n");
                 saveEncryptedInDB(plainTextFile);
 
+                textArea.append("DESZYFROWANIE PLIKU ZAPISANEGO W BAZIE DANYCH \n");
+
                 textArea.append("Deszyfruję plik " + plainTextFile.getName() + " z bazy danych \n");
                 decryptFileFromDB("plainTextFile");
 
