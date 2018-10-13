@@ -13,13 +13,18 @@ import org.hibernate.service.ServiceRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class EncryptedDataService {
 
     private static EncryptedDataService instance;
-    private final TripleDESEncrypter tripleDESEncrypter = TripleDESEncrypter.getInstance();
 
-    private EncryptedDataService() {}
+    private final TripleDESEncrypter tripleDESEncrypter = TripleDESEncrypter.getInstance();
+    private SessionFactory sessionFactory;
+
+    private EncryptedDataService() {
+        initSessionFactory();
+    }
 
     public static EncryptedDataService getInstance() {
         if (instance == null) {
@@ -35,7 +40,7 @@ public class EncryptedDataService {
     }
 
     public EncryptedData save(EncryptedData encryptedData) {
-        Session session = getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         Transaction trans = session.beginTransaction();
         session.save(encryptedData);
         trans.commit();
@@ -45,29 +50,29 @@ public class EncryptedDataService {
     }
 
     public List<String> getAllEncryptedFileNames() {
-        Session session = getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         String hql = "SELECT e.fileName FROM EncryptedData e";
         Query query = session.createQuery(hql);
         return query.list();
     }
 
-    public EncryptedData getByFileName(String fileName) {
-        Session session = getSessionFactory().openSession();
+    public Optional<EncryptedData> getByFileName(String fileName) {
+        Session session = sessionFactory.openSession();
         String hql = "SELECT e FROM EncryptedData e WHERE e.fileName = :fileName";
         Query query = session.createQuery(hql);
         query.setParameter("fileName", fileName);
-        return (EncryptedData) query.uniqueResult();
+        EncryptedData result = (EncryptedData) query.uniqueResult();
+        return Optional.ofNullable(result);
     }
 
-    private static SessionFactory getSessionFactory() {
+    private void initSessionFactory() {
         Configuration conf = new Configuration();
         conf.configure("hibernate.cfg.xml");
         conf.addAnnotatedClass(EncryptedData.class);
 
         ServiceRegistry serviceRegistryObj = new StandardServiceRegistryBuilder().applySettings(conf.getProperties()).build();
 
-        SessionFactory factoryObj = conf.buildSessionFactory(serviceRegistryObj);
-        return factoryObj;
+        sessionFactory = conf.buildSessionFactory(serviceRegistryObj);
     }
 
 

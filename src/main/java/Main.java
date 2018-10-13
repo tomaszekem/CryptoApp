@@ -28,15 +28,13 @@ public class Main {
     }
 
     private static void initView() {
-        //Creating the Frame
         JFrame frame = new JFrame("Aplikacja szyfrująca");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 900);
 
-        //Creating the MenuBar and adding components
         createBottomPanel();
         textArea = new JTextArea();
-        //Adding Components to the frame.
+
         frame.getContentPane().add(BorderLayout.SOUTH, panel);
         frame.getContentPane().add(BorderLayout.CENTER, textArea);
         frame.setVisible(true);

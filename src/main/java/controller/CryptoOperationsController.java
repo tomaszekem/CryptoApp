@@ -8,6 +8,7 @@ import db.entity.service.EncryptedDataService;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class CryptoOperationsController {
 
@@ -39,8 +40,11 @@ public class CryptoOperationsController {
     }
 
     public void decryptFileFromDB(String fileName) throws IOException {
-        EncryptedData encryptedData = encryptedDataService.getByFileName(fileName);
-        tripleDESEncrypter.decryptFile(encryptedData);
+        Optional<EncryptedData> encryptedData = encryptedDataService.getByFileName(fileName);
+        if (encryptedData.isPresent()) {
+            tripleDESEncrypter.decryptFile(encryptedData.get());
+        }
+        System.out.println("No data found for file " + fileName);
     }
 
 }

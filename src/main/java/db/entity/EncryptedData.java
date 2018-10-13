@@ -4,10 +4,11 @@ import org.apache.commons.io.FilenameUtils;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "encrypted_data")
-public class EncryptedData {
+public class EncryptedData implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
